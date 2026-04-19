@@ -101,21 +101,41 @@ pnpm build       # builds packages/shared (dist/ is consumed by the apps)
 
 ### 2. Supabase
 
-1. Create a new project at [app.supabase.com](https://app.supabase.com).
-2. Apply the schema:
+denkfink stores sessions, transcripts, definitions, print queue, programs config, and rendered card PNGs in one Supabase project. Here's the full bootstrap:
 
+1. **Create the project** at [app.supabase.com](https://app.supabase.com). Any region, free tier is fine to start. Note down the **project ref** (the slug in the URL, e.g. `abcd1234efgh`), the **project URL** (`https://<ref>.supabase.co`), the **anon key**, and the **service role key** — all under Project Settings → API.
+
+2. **Apply the schema.**
+
+   Option A — Supabase CLI (recommended if you'll keep iterating):
    ```bash
-   # Using the Supabase CLI (recommended):
+   # Install once: https://supabase.com/docs/guides/cli
+   supabase login
    supabase link --project-ref <your-project-ref>
-   supabase db push
-
-   # Or, in the Supabase SQL editor, paste each file from supabase/migrations/
-   # in chronological order.
+   supabase db push      # applies every file in supabase/migrations/ in order
    ```
 
-3. Enable **Realtime** on the `print_queue` table (Database → Replication).
-4. Create a storage bucket called `prints` (public read). This is where
-   rendered card PNGs are uploaded for the printer bridge to pick up.
+   Option B — SQL Editor (one-shot, no CLI):
+   ```bash
+   ls supabase/migrations/   # list migration files in chronological order
+   ```
+   Open Supabase → **SQL Editor** → paste each file in order → Run. There are ~13 files; all of them must be applied.
+
+3. **Enable Realtime** on the `print_queue` table.
+   Database → **Replication** → switch `print_queue` to *on* under the `supabase_realtime` publication. Without this, the printer bridge will never wake up when new jobs arrive.
+
+4. **Create a public storage bucket** called `prints`.
+   Storage → **New bucket** → name `prints` → Public bucket = ✅. This is where rendered card PNGs live; the printer bridge downloads from here.
+
+5. **(Optional)** Enable **pgvector** if you want conversation embeddings for analysis. Database → **Extensions** → search `vector` → enable. The embeddings are populated by the backend's `/api/embeddings` job.
+
+6. **Verify** with a quick query in SQL Editor:
+   ```sql
+   select table_name from information_schema.tables
+   where table_schema = 'public' order by table_name;
+   -- should list: definitions, installation_config, print_queue, programs,
+   -- prompts, render_config, secrets, sessions, texts, turns, …
+   ```
 
 ### 3. ElevenLabs agent
 

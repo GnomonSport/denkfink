@@ -54,3 +54,24 @@ services:
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
       RENDER_API_KEY: ${RENDER_API_KEY:-dev-key}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      ARCHIVE_BASE_URL: ${VITE_ARCHIVE_BASE:-}
+
+  archive:
+    build:
+      context: .
+      dockerfile: apps/archive/Dockerfile
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
+    ports:
+      - "3002:80"
+
+  config:
+    build:
+      context: .
+      dockerfile: apps/config/Dockerfile
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
+    ports:
+      - "3003:80"

@@ -26,8 +26,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build shared package
-        run: pnpm --filter @denkfink/shared build
+      - name: Build shared packages
+        run: |
+          pnpm --filter @denkfink/shared build
+          pnpm --filter karaoke-reader build
 
       - name: Typecheck
         run: pnpm -r typecheck
