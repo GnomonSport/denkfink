@@ -1,0 +1,23 @@
+{
+  "name": "denkfink",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "dev:tablet": "pnpm --filter @denkfink/tablet dev",
+    "dev:backend": "pnpm --filter @denkfink/backend dev",
+    "dev:printer": "pnpm --filter @denkfink/printer-bridge dev",
+    "dev:pos": "cd apps/pos-server && ./venv/bin/python print_server.py --dummy",
+    "start:pos": "cd apps/pos-server && ./venv/bin/python print_server.py",
+    "setup:pos": "cd apps/pos-server && bash setup.sh --deps-only",
+    "build": "pnpm --filter @denkfink/shared build && pnpm -r --filter '!@denkfink/shared' build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

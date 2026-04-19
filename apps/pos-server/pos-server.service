@@ -1,0 +1,19 @@
+[Unit]
+Description=denkfink POS Thermal Printer Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Replace `pi` with the user that owns the checkout on your host.
+User=pi
+# Replace path below if you cloned denkfink somewhere else than /home/pi/denkfink.
+WorkingDirectory=/home/pi/denkfink/apps/pos-server
+ExecStart=/usr/bin/python3 print_server.py
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

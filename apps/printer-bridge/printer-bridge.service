@@ -1,0 +1,20 @@
+[Unit]
+Description=denkfink Printer Bridge
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Replace `pi` with the user that owns the checkout on your host.
+User=pi
+# Replace paths below if you cloned denkfink somewhere else than /home/pi/denkfink.
+WorkingDirectory=/home/pi/denkfink/apps/printer-bridge
+ExecStart=/usr/bin/npx tsx src/index.ts
+EnvironmentFile=/home/pi/denkfink/apps/printer-bridge/.env
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

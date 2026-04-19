@@ -1,0 +1,56 @@
+# Local-dev compose: tablet + backend + print-renderer.
+# The printer bridge and POS server are intentionally NOT included — they need
+# a physical thermal printer on the LAN, so running them in a container next
+# to Supabase + tablet doesn't gain anything.
+#
+# Requirements:
+#   - A Supabase project (hosted or self-hosted) with schema migrations applied.
+#   - An ElevenLabs agent + OpenRouter + OpenAI keys.
+#   - A `.env` file at the repo root with the keys listed below.
+#
+# Usage: `docker compose up`
+# The tablet is served at http://localhost:3000, backend at :3001, renderer at :8000.
+
+services:
+  tablet:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
+        VITE_ELEVENLABS_API_KEY: ${VITE_ELEVENLABS_API_KEY}
+        VITE_ELEVENLABS_AGENT_ID: ${VITE_ELEVENLABS_AGENT_ID}
+        VITE_BACKEND_URL: http://localhost:3001
+        VITE_PRINT_RENDERER_URL: http://localhost:8000
+        VITE_ARCHIVE_BASE: ${VITE_ARCHIVE_BASE:-}
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY}
+      ELEVENLABS_AGENT_ID: ${ELEVENLABS_AGENT_ID}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+
+  print-renderer:
+    build:
+      context: apps/print-renderer
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      RENDER_API_KEY: ${RENDER_API_KEY:-dev-key}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}

@@ -1,0 +1,245 @@
+/* ============================================================
+ * karaoke-reader — self-contained CSS stylesheet
+ *
+ * All visual properties are overridable via --kr-* custom
+ * properties set on a parent element. No Tailwind dependency.
+ * ============================================================ */
+
+/* ------------------------------------------------------------
+ * Custom property defaults
+ * ------------------------------------------------------------ */
+
+.kr-root {
+  --kr-bg: #000000;
+  --kr-color: #ffffff;
+  --kr-font-family: Helvetica, 'Helvetica Neue', Arial, sans-serif;
+  --kr-font-size: clamp(1.2rem, 3vw, 1.8rem);
+  --kr-line-height: 1.8;
+  --kr-letter-spacing: 0.02em;
+  --kr-padding: clamp(2rem, 6vw, 4rem) clamp(2rem, 8vw, 6rem);
+  --kr-max-width: 700px;
+  --kr-highlight-color: #fcd34d;
+  --kr-spoken-opacity: 0.4;
+  --kr-upcoming-opacity: 0.9;
+  --kr-active-opacity: 1;
+  --kr-transition-color: color 0.2s ease;
+  --kr-transition-opacity: opacity 0.4s ease;
+  --kr-header-font-size: clamp(0.9rem, 2vw, 1.1rem);
+  --kr-header-opacity: 0.5;
+  --kr-controls-opacity: 0.15;
+  --kr-controls-hover-opacity: 0.5;
+  --kr-slider-track-color: rgba(255, 255, 255, 0.2);
+  --kr-slider-thumb-color: rgba(255, 255, 255, 0.4);
+  --kr-error-color: #ef4444;
+
+  /* Base styles */
+  background: var(--kr-bg);
+  color: var(--kr-color);
+  font-family: var(--kr-font-family);
+  font-size: var(--kr-font-size);
+  line-height: var(--kr-line-height);
+  letter-spacing: var(--kr-letter-spacing);
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  outline: none;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ------------------------------------------------------------
+ * Scroll container and content
+ * ------------------------------------------------------------ */
+
+.kr-scroll-container {
+  overflow-y: auto;
+  height: 100%;
+  padding: var(--kr-padding);
+  cursor: pointer;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.kr-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.kr-content {
+  max-width: var(--kr-max-width);
+  margin: 0 auto;
+}
+
+/* ------------------------------------------------------------
+ * Paragraphs and lines
+ * ------------------------------------------------------------ */
+
+.kr-paragraph {
+  margin-bottom: 1.5em;
+}
+
+.kr-line {
+  margin: 0;
+  padding: 0;
+}
+
+.kr-line--header {
+  font-size: var(--kr-header-font-size);
+  opacity: var(--kr-header-opacity);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 0.5em;
+}
+
+.kr-line--list-item {
+  padding-left: 1.2em;
+  border-left: 2px solid var(--kr-color);
+  border-left-color: inherit;
+  opacity: 0.7;
+  margin-bottom: 0.3em;
+}
+
+.kr-line--text {
+  /* Inherits base styles -- no overrides needed */
+}
+
+/* ------------------------------------------------------------
+ * Word states (data-kr-state driven)
+ * ------------------------------------------------------------ */
+
+.kr-word {
+  transition: var(--kr-transition-color), var(--kr-transition-opacity);
+  display: inline;
+  cursor: pointer;
+}
+
+.kr-word[data-kr-state="upcoming"] {
+  opacity: var(--kr-upcoming-opacity);
+  color: var(--kr-color);
+}
+
+.kr-word[data-kr-state="active"] {
+  color: var(--kr-highlight-color);
+  opacity: var(--kr-active-opacity);
+}
+
+.kr-word[data-kr-state="spoken"] {
+  opacity: var(--kr-spoken-opacity);
+  color: var(--kr-color);
+}
+
+.kr-word--strikethrough {
+  text-decoration: line-through;
+}
+
+/* ------------------------------------------------------------
+ * Controls and volume slider
+ * ------------------------------------------------------------ */
+
+.kr-controls {
+  position: absolute;
+  bottom: 1rem;
+  right: 1.5rem;
+  opacity: var(--kr-controls-opacity);
+  transition: opacity 0.3s ease;
+}
+
+.kr-controls:hover {
+  opacity: var(--kr-controls-hover-opacity);
+}
+
+.kr-volume-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--kr-color);
+  opacity: 0.6;
+  cursor: pointer;
+  user-select: none;
+}
+
+.kr-volume-slider {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 80px;
+  height: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* WebKit track */
+.kr-volume-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  background: var(--kr-slider-track-color);
+  border-radius: 2px;
+}
+
+/* WebKit thumb */
+.kr-volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--kr-slider-thumb-color);
+  margin-top: -4px;
+  border: none;
+}
+
+/* Firefox track */
+.kr-volume-slider::-moz-range-track {
+  height: 4px;
+  background: var(--kr-slider-track-color);
+  border-radius: 2px;
+  border: none;
+}
+
+/* Firefox thumb */
+.kr-volume-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--kr-slider-thumb-color);
+  border: none;
+}
+
+/* ------------------------------------------------------------
+ * Loading and error states
+ * ------------------------------------------------------------ */
+
+.kr-root[data-kr-status="loading"],
+.kr-root[data-kr-status="error"] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kr-loading-indicator {
+  color: var(--kr-color);
+  opacity: 0.5;
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+  animation: kr-pulse 2s ease-in-out infinite;
+}
+
+.kr-error-fallback {
+  color: var(--kr-error-color);
+  font-size: 0.9rem;
+  text-align: center;
+  max-width: 400px;
+  padding: 1rem;
+  line-height: 1.5;
+}
+
+@keyframes kr-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}

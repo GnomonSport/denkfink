@@ -1,0 +1,67 @@
+/**
+ * CameraDetector
+ *
+ * A renderless component that:
+ *  1. Maintains a hidden <video> element receiving the front-facing camera stream.
+ *  2. Runs MediaPipe face detection at 2 fps.
+ *  3. Calls onWake / onSleep once the debounced thresholds are crossed.
+ *
+ * The camera feed is NEVER shown to the visitor.
+ * If camera permission is denied, the component logs a warning and renders nothing —
+ * the visitor can still tap the SleepScreen to trigger WAKE manually.
+ */
+
+import { useCallback } from 'react';
+import { useFaceDetection } from '../hooks/useFaceDetection';
+
+interface CameraDetectorProps {
+  onWake: () => void;
+  onSleep: () => void;
+  /** Shared ref to the hidden <video> element — created by the parent so
+   *  both face detection and portrait capture can read from the same stream. */
+  videoRef: React.RefObject<HTMLVideoElement | null>;
+}
+
+export function CameraDetector({ onWake, onSleep, videoRef }: CameraDetectorProps) {
+
+  const { error, cameraReady } = useFaceDetection({
+    videoRef,
+    onWake,
+    onSleep,
+  });
+
+  // Callback ref bridges the RefObject<T | null> to JSX's LegacyRef<T>.
+  // React 18 @types/react don't accept RefObject<T | null> on intrinsic elements.
+  const setVideoRef = useCallback(
+    (el: HTMLVideoElement | null) => {
+      (videoRef as React.MutableRefObject<HTMLVideoElement | null>).current = el;
+    },
+    [videoRef],
+  );
+
+  // Log errors once in dev but don't crash — tap-to-start on SleepScreen is the fallback
+  if (error && !cameraReady) {
+    console.warn('[CameraDetector]', error);
+  }
+
+  return (
+    // This video element is completely invisible — zero dimensions, no pointer events.
+    // MediaPipe reads frames from it via detectForVideo().
+    <video
+      ref={setVideoRef}
+      style={{
+        position: 'fixed',
+        width: 0,
+        height: 0,
+        opacity: 0,
+        pointerEvents: 'none',
+        // Keep it off-screen rather than display:none so MediaPipe can still read frames
+        top: -9999,
+        left: -9999,
+      }}
+      muted
+      playsInline
+      aria-hidden="true"
+    />
+  );
+}
